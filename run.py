@@ -5,6 +5,7 @@ from flask_wtf import FlaskForm
 from flask_bootstrap import Bootstrap
 from wtforms import StringField, SubmitField, SelectMultipleField, DateField, SelectField
 from wtforms.validators import DataRequired
+import unicodedata
 
 app = Flask(__name__, static_url_path='/static')
 app.config['SECRET_KEY'] = 'secret_key'
@@ -102,10 +103,10 @@ class ES_Data:
               "minimum_should_match": should_match,
               "should": [
                 {
-                  "match": {"matiere": search_input}
+                  "match": {"matiere": remove_accents(search_input)}
                 },
                 {
-                  "match": {"description": search_input}
+                  "match": {"description": remove_accents(search_input)}
                 },
                 {
                   "match": {"categorie": category_input}
@@ -138,6 +139,9 @@ class SearchForm(FlaskForm):
     start_date = DateField('Premier Cours', format='%Y-%m-%d', render_kw={"placeholder": "YYYY-MM-dd"})
     end_date = DateField('dernier_cours', format='%Y-%m-%d', render_kw={"placeholder": "YYYY-MM-dd"})
 
+def remove_accents(text):
+    text = unicodedata.normalize('NFKD', text)
+    return "".join([c for c in text if not unicodedata.combining(c)])
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=3000)
